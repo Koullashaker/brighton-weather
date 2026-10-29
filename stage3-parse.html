@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 3 - Pick out the weather</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <main class="card loading" id="card">
+    <span class="stage">Stage 3 · Pick out the weather</span>
+
+    <h1>Weather in <span id="town"></span></h1>
+    <p class="sub">Raw values, picked out of the JSON</p>
+
+    <div id="icon" aria-hidden="true">🔎</div>
+    <p class="raw" id="temp">--</p>
+    <p id="weather">--</p>
+
+    <div class="details">
+      <div class="wide">
+        <span class="k">Recorded</span>
+        <span class="v raw-v" id="time">----------T--:--</span>
+        <span class="extra">Town <strong id="townValue"></strong></span>
+      </div>
+    </div>
+
+    <p id="message" class="error"></p>
+
+    <div class="key">
+      <p class="key-title">Where each value comes from</p>
+      <ul class="codes">
+        <li>🌡️ Temperature<span class="num">data.current.temperature_2m</span></li>
+        <li>☁️ Weather code<span class="num">data.current.weather_code</span></li>
+        <li>🕒 Recorded<span class="num">data.current.time</span></li>
+        <li>📍 Town<span class="num">CONFIG.town</span></li>
+      </ul>
+    </div>
+
+    <p class="note">Turn off <strong>Wi-Fi</strong> and reload to see the error. The values are raw for now; Stage 4 formats them.</p>
+  </main>
+
+  <script>
+    // Settings for the API, kept in one place.
+    // Open-Meteo needs no API key. If an API did need one,
+    // it would go here, e.g. apiKey: "your-key".
+    // Remember: anything in a web page can be seen in DevTools.
+    const CONFIG = {
+      town: "Brighton",
+      latitude: 50.8284,
+      longitude: -0.1395
+    };
+
+    // Build the API address from the settings
+    function buildUrl() {
+      return "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + CONFIG.latitude +
+        "&longitude=" + CONFIG.longitude +
+        "&current=temperature_2m,weather_code,wind_speed_10m" +
+        "&timezone=Europe%2FLondon";
+    }
+
+    // Pick out the parts we want and show them, as they come
+    function showWeather(data) {
+      document.getElementById("town").textContent = CONFIG.town;
+      document.getElementById("townValue").textContent = CONFIG.town;
+      document.getElementById("weather").textContent = data.current.weather_code;
+      document.getElementById("temp").textContent = data.current.temperature_2m;
+      document.getElementById("time").textContent = data.current.time;
+    }
+
+    // Get the data from the API, then show it
+    async function loadWeather() {
+      try {
+        const response = await fetch(buildUrl());
+        const data = await response.json();
+        showWeather(data);
+      } catch (error) {
+        document.getElementById("message").textContent = "Could not load the weather.";
+      }
+      document.getElementById("card").classList.remove("loading");
+    }
+
+    // Show the town straight away, then load the weather
+    document.getElementById("town").textContent = CONFIG.town;
+    loadWeather();
+  </script>
+</body>
+</html>

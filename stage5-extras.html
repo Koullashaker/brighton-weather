@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 5 - Optional extras</title>
+  <!-- Extra: styles live in their own folder -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/stage5.css">
+</head>
+<body class="fun">
+  <!-- Animated sky: sun, clouds, rain or snow, set from app.js -->
+  <div id="sky" aria-hidden="true"></div>
+
+  <main class="card loading" id="card">
+    <span class="stage">Stage 5 · Optional extras</span>
+
+    <!-- Extra 3: choose the town -->
+    <form class="search" id="searchForm">
+      <input id="townInput" type="text" placeholder="Where to? Try Lewes…" autocomplete="off" aria-label="Town">
+      <button class="btn btn-primary" id="search" type="submit">Search 🔍</button>
+    </form>
+    <div class="chips" id="chips">
+      <button class="chip" type="button">Lewes</button>
+      <button class="chip" type="button">Oslo</button>
+      <button class="chip" type="button">Cairo</button>
+      <button class="chip" type="button">Tokyo</button>
+      <button class="chip" type="button">Reykjavik</button>
+    </div>
+
+    <h1>Weather in <span id="town"></span></h1>
+    <p class="sub" id="place"></p>
+
+    <!-- Extra 2: weather graphic -->
+    <div id="icon" aria-hidden="true">⏳</div>
+    <p id="temp">--</p>
+    <p id="weather">Loading…</p>
+    <p class="mood" id="mood"></p>
+
+    <div class="details">
+      <div class="wide">
+        <span class="k">Recorded</span>
+        <span class="v" id="time">--/--/---- --:--</span>
+        <span class="extra">Wind <strong id="wind">--</strong></span>
+      </div>
+    </div>
+
+    <button class="btn btn-light btn-block" id="refresh" type="button"><span class="spin">↻</span> Refresh data</button>
+    <p id="message" aria-live="polite"></p>
+
+    <div class="key">
+      <p class="key-title">Weather codes</p>
+      <ul class="codes" id="codes">
+        <li data-word="Clear sky">☀️ Clear sky<span class="num">0</span></li>
+        <li data-word="Cloudy">☁️ Cloudy<span class="num">1–3</span></li>
+        <li data-word="Fog">🌫️ Fog<span class="num">45–48</span></li>
+        <li data-word="Rain">🌧️ Rain<span class="num">51–67</span></li>
+        <li data-word="Snow">❄️ Snow<span class="num">71–77</span></li>
+        <li data-word="Rain showers">🌦️ Rain showers<span class="num">80–82</span></li>
+        <li data-word="Snow showers">🌨️ Snow showers<span class="num">85–86</span></li>
+        <li data-word="Thunderstorm">⛈️ Thunderstorm<span class="num">95+</span></li>
+      </ul>
+    </div>
+
+    <p class="note">Search for <strong>Lewes</strong>, or tap a town above. The sky changes to match the weather there.</p>
+  </main>
+
+  <!-- Extra: JavaScript lives in its own folder -->
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

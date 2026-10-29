@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 1 - Set up the API</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <main class="card">
+    <span class="stage">Stage 1 · Set up the API</span>
+
+    <h1>Weather in <span id="town"></span></h1>
+    <p class="sub">England, United Kingdom</p>
+
+    <div id="icon" aria-hidden="true">📍</div>
+
+    <div class="details">
+      <div class="wide">
+        <span class="k">Location</span>
+        <span class="v"><span id="lat"></span>, <span id="lon"></span></span>
+        <span class="extra">Latitude, longitude</span>
+      </div>
+    </div>
+
+    <p class="label">API address</p>
+    <div class="url-box">
+      <a id="apiLink" target="_blank" rel="noopener"></a>
+    </div>
+
+    <a class="btn btn-primary btn-block" id="openBtn" target="_blank" rel="noopener">Open the JSON ↗</a>
+    <button class="btn btn-light btn-block" id="copyBtn" type="button">Copy URL</button>
+
+    <div class="key">
+      <p class="key-title">What the URL asks for</p>
+      <ul class="codes">
+        <li>📍 latitude<span class="num" id="pLat"></span></li>
+        <li>📍 longitude<span class="num" id="pLon"></span></li>
+        <li>🌡️ temperature_2m</li>
+        <li>☁️ weather_code</li>
+        <li>💨 wind_speed_10m</li>
+        <li>🕒 timezone<span class="num">Europe/London</span></li>
+      </ul>
+    </div>
+
+    <p class="note"><strong>No key needed.</strong> Open-Meteo is free. If an API needed a key it would go in CONFIG, but anyone can see it in DevTools, so real secret keys belong on a server.</p>
+  </main>
+
+  <script>
+    // Settings for the API, kept in one place.
+    // Open-Meteo needs no API key. If an API did need one,
+    // it would go here, e.g. apiKey: "your-key".
+    // Remember: anything in a web page can be seen in DevTools.
+    const CONFIG = {
+      town: "Brighton",
+      latitude: 50.8284,
+      longitude: -0.1395
+    };
+
+    // Build the API address from the settings
+    function buildUrl() {
+      return "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + CONFIG.latitude +
+        "&longitude=" + CONFIG.longitude +
+        "&current=temperature_2m,weather_code,wind_speed_10m" +
+        "&timezone=Europe%2FLondon";
+    }
+
+    // Show the town and the API link on the page
+    document.getElementById("town").textContent = CONFIG.town;
+    const link = document.getElementById("apiLink");
+    link.href = buildUrl();
+    link.textContent = buildUrl();
+
+    // Extras: show the settings and wire up the buttons
+    document.getElementById("lat").textContent = CONFIG.latitude;
+    document.getElementById("lon").textContent = CONFIG.longitude;
+    document.getElementById("pLat").textContent = CONFIG.latitude;
+    document.getElementById("pLon").textContent = CONFIG.longitude;
+    document.getElementById("openBtn").href = buildUrl();
+
+    const copyBtn = document.getElementById("copyBtn");
+    copyBtn.addEventListener("click", function () {
+      navigator.clipboard.writeText(buildUrl()).then(function () {
+        copyBtn.textContent = "Copied ✓";
+        setTimeout(function () { copyBtn.textContent = "Copy URL"; }, 1500);
+      });
+    });
+  </script>
+</body>
+</html>

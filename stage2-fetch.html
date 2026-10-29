@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 2 - Fetch the data</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <main class="card wide" id="card">
+    <span class="stage" id="status"><span class="dot"></span><span id="statusText">Stage 2 · Loading…</span></span>
+
+    <h1>Weather in <span id="town">Brighton</span></h1>
+    <p class="sub">Fetched with <code>fetch</code>, <code>async</code> and <code>await</code></p>
+
+    <div class="head">
+      <p class="label">Raw data</p>
+      <span class="meta" id="meta"></span>
+    </div>
+    <pre id="raw">Loading...</pre>
+
+    <button class="btn btn-primary btn-block" id="reloadBtn" type="button"><span class="spin">↻</span> Fetch again</button>
+    <p id="message" aria-live="polite"></p>
+
+    <div class="key">
+      <p class="key-title">Look for these in the JSON</p>
+      <ul class="codes">
+        <li>🌡️ temperature_2m</li>
+        <li>☁️ weather_code</li>
+        <li>💨 wind_speed_10m</li>
+        <li>🕒 time</li>
+      </ul>
+    </div>
+
+    <p class="note">Press <strong>F12</strong>, open <strong>Network</strong>, then click <strong>Fetch again</strong>. Click the <strong>forecast?latitude=…</strong> request to see the same JSON.</p>
+  </main>
+
+  <script>
+    // Settings for the API, kept in one place.
+    // Open-Meteo needs no API key. If an API did need one,
+    // it would go here, e.g. apiKey: "your-key".
+    // Remember: anything in a web page can be seen in DevTools.
+    const CONFIG = {
+      town: "Brighton",
+      latitude: 50.8284,
+      longitude: -0.1395
+    };
+
+    // Build the API address from the settings
+    function buildUrl() {
+      return "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + CONFIG.latitude +
+        "&longitude=" + CONFIG.longitude +
+        "&current=temperature_2m,weather_code,wind_speed_10m" +
+        "&timezone=Europe%2FLondon";
+    }
+
+    // Get the data from the API and show it as raw text
+    async function loadWeather() {
+      const raw = document.getElementById("raw");
+      const message = document.getElementById("message");
+      setStatus("", "Stage 2 · Loading…");
+      document.getElementById("card").classList.add("loading");
+      raw.className = "";
+      raw.textContent = "Loading...";
+
+      try {
+        const response = await fetch(buildUrl());
+        const data = await response.json();
+        raw.innerHTML = colourJson(JSON.stringify(data, null, 2));
+        document.getElementById("meta").textContent = "HTTP " + response.status;
+        message.className = "";
+        message.textContent = "Checked at " + new Date().toLocaleTimeString("en-GB");
+        setStatus("ok", "Stage 2 · Data loaded");
+      } catch (error) {
+        raw.className = "error";
+        raw.textContent = "Could not load the weather: " + error.message;
+        message.textContent = "";
+        setStatus("bad", "Stage 2 · Failed");
+      }
+      document.getElementById("card").classList.remove("loading");
+    }
+
+    // Small helpers for the look of the page
+    function setStatus(kind, text) {
+      document.getElementById("status").className = "stage " + kind;
+      document.getElementById("statusText").textContent = text;
+    }
+
+    // Colour keys, strings and numbers in the JSON text
+    function colourJson(text) {
+      const safe = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return safe
+        .replace(/("[^"]*")(\s*:)/g, '<span class="k">$1</span>$2')
+        .replace(/(:\s*)("[^"]*")/g, '$1<span class="s">$2</span>')
+        .replace(/(:\s*)(-?\d+(\.\d+)?)/g, '$1<span class="n">$2</span>');
+    }
+
+    document.getElementById("reloadBtn").addEventListener("click", loadWeather);
+
+    // Load the weather when the page opens
+    loadWeather();
+  </script>
+</body>
+</html>

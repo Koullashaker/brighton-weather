@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage 4 - Refresh and format</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <main class="card loading" id="card">
+    <span class="stage">Stage 4 · Refresh and format</span>
+
+    <h1>Weather in <span id="town"></span></h1>
+    <p class="sub">England, United Kingdom</p>
+
+    <div id="icon" aria-hidden="true">⏳</div>
+    <p id="temp">--</p>
+    <p id="weather">Loading…</p>
+
+    <div class="details">
+      <div class="wide">
+        <span class="k">Recorded</span>
+        <span class="v" id="time">--/--/---- --:--</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="refresh" type="button"><span class="spin">↻</span> Refresh data</button>
+    <p id="message" aria-live="polite"></p>
+
+    <div class="key">
+      <p class="key-title">Weather codes</p>
+      <ul class="codes" id="codes">
+        <li data-word="Clear sky">☀️ Clear sky<span class="num">0</span></li>
+        <li data-word="Cloudy">☁️ Cloudy<span class="num">1–3</span></li>
+        <li data-word="Fog">🌫️ Fog<span class="num">45–48</span></li>
+        <li data-word="Rain">🌧️ Rain<span class="num">51–67</span></li>
+        <li data-word="Snow">❄️ Snow<span class="num">71–77</span></li>
+        <li data-word="Rain showers">🌦️ Rain showers<span class="num">80–82</span></li>
+        <li data-word="Snow showers">🌨️ Snow showers<span class="num">85–86</span></li>
+        <li data-word="Thunderstorm">⛈️ Thunderstorm<span class="num">95+</span></li>
+      </ul>
+    </div>
+
+    <p class="note">Open <strong>DevTools › Network</strong> and click Refresh: a new request appears each time. The data updates every <strong>15 minutes</strong>, so values may not change straight away.</p>
+  </main>
+
+  <script>
+    // Settings for the API, kept in one place.
+    // Open-Meteo needs no API key. If an API did need one,
+    // it would go here, e.g. apiKey: "your-key".
+    // Remember: anything in a web page can be seen in DevTools.
+    const CONFIG = {
+      town: "Brighton",
+      latitude: 50.8284,
+      longitude: -0.1395
+    };
+
+    // Build the API address from the settings
+    function buildUrl() {
+      return "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + CONFIG.latitude +
+        "&longitude=" + CONFIG.longitude +
+        "&current=temperature_2m,weather_code,wind_speed_10m" +
+        "&timezone=Europe%2FLondon";
+    }
+
+    // Turn "2026-10-28T12:45" into "28/10/2026 12:45"
+    function formatDate(isoString) {
+      const parts = isoString.split("T");      // ["2026-10-28", "12:45"]
+      const date = parts[0].split("-");        // ["2026", "10", "28"]
+      return date[2] + "/" + date[1] + "/" + date[0] + " " + parts[1];
+    }
+
+    // Turn the weather code into words
+    function describeWeather(code) {
+      if (code === 0) return "Clear sky";
+      if (code >= 1 && code <= 3) return "Cloudy";
+      if (code >= 45 && code <= 48) return "Fog";
+      if (code >= 51 && code <= 67) return "Rain";
+      if (code >= 71 && code <= 77) return "Snow";
+      if (code >= 80 && code <= 82) return "Rain showers";
+      if (code >= 85 && code <= 86) return "Snow showers";
+      if (code >= 95) return "Thunderstorm";
+      return "Unknown";
+    }
+
+    // A picture to go with the words (just for the look of the page)
+    const ICONS = {
+      "Clear sky": "☀️",
+      "Cloudy": "☁️",
+      "Fog": "🌫️",
+      "Rain": "🌧️",
+      "Snow": "❄️",
+      "Rain showers": "🌦️",
+      "Snow showers": "🌨️",
+      "Thunderstorm": "⛈️",
+      "Unknown": "🌡️"
+    };
+
+    // Pick out the parts we want and show them, formatted
+    function showWeather(data) {
+      const words = describeWeather(data.current.weather_code);
+      document.getElementById("town").textContent = CONFIG.town;
+      document.getElementById("weather").textContent = words;
+      document.getElementById("temp").textContent = data.current.temperature_2m + " °C";
+      document.getElementById("time").textContent = formatDate(data.current.time);
+
+      // Extras: icon, and highlight the matching code in the key
+      document.getElementById("icon").textContent = ICONS[words];
+      document.querySelectorAll("#codes li").forEach(function (li) {
+        li.classList.toggle("active", li.dataset.word === words);
+      });
+    }
+
+    // Get the data from the API, then show it
+    async function loadWeather() {
+      const message = document.getElementById("message");
+      const card = document.getElementById("card");
+      const button = document.getElementById("refresh");
+
+      message.className = "";
+      message.textContent = "Loading...";
+      card.classList.add("loading");
+      button.disabled = true;
+
+      try {
+        const response = await fetch(buildUrl());
+        const data = await response.json();
+        showWeather(data);
+        message.textContent = "Checked at " + new Date().toLocaleTimeString("en-GB");
+      } catch (error) {
+        message.className = "error";
+        message.textContent = "Could not load the weather.";
+      }
+
+      card.classList.remove("loading");
+      button.disabled = false;
+    }
+
+    // Run when the page loads, and again when the button is clicked
+    document.getElementById("town").textContent = CONFIG.town;
+    loadWeather();
+    document.getElementById("refresh").addEventListener("click", loadWeather);
+  </script>
+</body>
+</html>
